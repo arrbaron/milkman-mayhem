@@ -7,7 +7,8 @@ public class Rocket : MonoBehaviour {
 	Rigidbody rigidbody;
 	AudioSource audioSource;
 
-	public int thrustForce = 15;
+	[SerializeField] float thrustForce = 650f;
+	[SerializeField] float rotationThrust = 100f;
 
 	// Use this for initialization
 	void Start () {
@@ -22,18 +23,41 @@ public class Rocket : MonoBehaviour {
 
 	void ProcessInput() {
 		if (Input.GetKey(KeyCode.Space)) {
-			rigidbody.AddRelativeForce(Vector3.up * thrustForce);
-			if (!audioSource.isPlaying) audioSource.Play();
-
+			Thrust();
 		}
 		if (Input.GetKeyUp(KeyCode.Space)) {
 			audioSource.Stop();
 		}
 		if (Input.GetKey(KeyCode.A)) {
-			transform.Rotate(Vector3.forward);
+			Rotate(Vector3.forward);
 		}
 		else if (Input.GetKey(KeyCode.D)) {
-			transform.Rotate(-Vector3.forward);
+			Rotate(Vector3.back);
+		}
+	}
+
+	void Thrust() {
+		rigidbody.AddRelativeForce(Vector3.up * thrustForce * Time.deltaTime);
+        if (!audioSource.isPlaying) audioSource.Play();
+	}
+
+	void Rotate(Vector3 direction) {
+		rigidbody.freezeRotation = true;
+		
+		transform.Rotate(direction * rotationThrust * Time.deltaTime);
+
+		rigidbody.freezeRotation = false;
+	}
+
+	void OnCollisionEnter(Collision otherObject) {
+		if (otherObject.gameObject.tag == "Friendly") {
+			print("you're fine");
+		}
+		else if (otherObject.gameObject.tag == "Finish") {
+			print("VICTORY");
+		}
+		else {
+			print("DIE");
 		}
 	}
 }
